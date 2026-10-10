@@ -1,0 +1,66 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: ms-users
+              uri: lb://ms-users
+              predicates:
+                - Path=/users/**,/professors/**,/research-lines/**,/catalogs/**
+
+            - id: ms-availability
+              uri: lb://ms-availability
+              predicates:
+                - Path=/time-slots/**
+
+            - id: ms-users-openapi
+              uri: lb://ms-users
+              predicates:
+                - Path=/v3/api-docs/ms-users
+              filters:
+                - RewritePath=/v3/api-docs/ms-users, /v3/api-docs
+
+            - id: ms-availability-openapi
+              uri: lb://ms-availability
+              predicates:
+                - Path=/v3/api-docs/ms-availability
+              filters:
+                - RewritePath=/v3/api-docs/ms-availability, /v3/api-docs
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    urls:
+      - name: ms-users
+        url: /v3/api-docs/ms-users
+      - name: ms-availability
+        url: /v3/api-docs/ms-availability
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    com.netflix.discovery: WARN
