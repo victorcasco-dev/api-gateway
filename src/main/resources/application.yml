@@ -9,12 +9,12 @@ spring:
             - id: ms-users
               uri: lb://ms-users
               predicates:
-                - Path=/users/**,/professors/**,/research-lines/**,/catalogs/**
+                - Path=/users/**,/professors/**,/research-lines/**,/catalogs/**,/professor-research-lines/**
 
             - id: ms-availability
               uri: lb://ms-availability
               predicates:
-                - Path=/time-slots/**
+                - Path=/time-slots/**,/professor-references/**
 
             - id: ms-users-openapi
               uri: lb://ms-users

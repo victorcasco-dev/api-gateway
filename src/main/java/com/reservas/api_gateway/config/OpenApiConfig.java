@@ -5,9 +5,15 @@ import io.swagger.v3.oas.models.info.Info;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Metadatos OpenAPI del gateway (selector de definiciones ms-users / ms-availability en Swagger UI).
+ */
 @Configuration
 public class OpenApiConfig {
 
+	/**
+	 * @return documento OpenAPI raíz del gateway
+	 */
 	@Bean
 	public OpenAPI gatewayOpenApi() {
 		return new OpenAPI()
