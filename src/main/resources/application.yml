@@ -2,33 +2,62 @@ spring:
   application:
     name: api-gateway
   cloud:
+    discovery:
+      enabled: true
+    loadbalancer:
+      cache:
+        ttl: 3s
     gateway:
       server:
         webmvc:
           routes:
             - id: ms-users
-              uri: lb://ms-users
+              uri: ${GATEWAY_MS_USERS_URI:lb://ms-users}
               predicates:
                 - Path=/users/**,/professors/**,/research-lines/**,/catalogs/**,/professor-research-lines/**
 
             - id: ms-availability
-              uri: lb://ms-availability
+              uri: ${GATEWAY_MS_AVAILABILITY_URI:lb://ms-availability}
               predicates:
                 - Path=/time-slots/**,/professor-references/**
 
+            - id: ms-reservas
+              uri: ${GATEWAY_MS_RESERVAS_URI:lb://ms-reservas}
+              predicates:
+                - Path=/reservations/**,/consultation-types/**
+
+            - id: ms-notificaciones
+              uri: ${GATEWAY_MS_NOTIFICACIONES_URI:lb://ms-notificaciones}
+              predicates:
+                - Path=/notifications/**,/email-templates/**,/contact/**
+
             - id: ms-users-openapi
-              uri: lb://ms-users
+              uri: ${GATEWAY_MS_USERS_URI:lb://ms-users}
               predicates:
                 - Path=/v3/api-docs/ms-users
               filters:
                 - RewritePath=/v3/api-docs/ms-users, /v3/api-docs
 
             - id: ms-availability-openapi
-              uri: lb://ms-availability
+              uri: ${GATEWAY_MS_AVAILABILITY_URI:lb://ms-availability}
               predicates:
                 - Path=/v3/api-docs/ms-availability
               filters:
                 - RewritePath=/v3/api-docs/ms-availability, /v3/api-docs
+
+            - id: ms-reservas-openapi
+              uri: ${GATEWAY_MS_RESERVAS_URI:lb://ms-reservas}
+              predicates:
+                - Path=/v3/api-docs/ms-reservas
+              filters:
+                - RewritePath=/v3/api-docs/ms-reservas, /v3/api-docs
+
+            - id: ms-notificaciones-openapi
+              uri: ${GATEWAY_MS_NOTIFICACIONES_URI:lb://ms-notificaciones}
+              predicates:
+                - Path=/v3/api-docs/ms-notificaciones
+              filters:
+                - RewritePath=/v3/api-docs/ms-notificaciones, /v3/api-docs
 
 eureka:
   client:
@@ -37,7 +66,8 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
   instance:
-    prefer-ip-address: true
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+    prefer-ip-address: ${EUREKA_PREFER_IP:false}
 
 server:
   port: ${SERVER_PORT:8080}
@@ -54,11 +84,19 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui.html
+    # Sin esto Swagger UI solo muestra el OpenAPI vacío del gateway (un solo "server").
+    disable-swagger-default-url: true
+    urls-primary-name: ms-users
+    config-url: /v3/api-docs/swagger-config
     urls:
       - name: ms-users
         url: /v3/api-docs/ms-users
       - name: ms-availability
         url: /v3/api-docs/ms-availability
+      - name: ms-reservas
+        url: /v3/api-docs/ms-reservas
+      - name: ms-notificaciones
+        url: /v3/api-docs/ms-notificaciones
 
 logging:
   level:

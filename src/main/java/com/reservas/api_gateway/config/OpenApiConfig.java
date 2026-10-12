@@ -20,6 +20,6 @@ public class OpenApiConfig {
 				.info(new Info()
 						.title("API Gateway — Tutoring reservations")
 						.version("1.0.0")
-						.description("Use the dropdown to switch between ms-users and ms-availability OpenAPI definitions."));
+						.description("Use the dropdown to switch between microservice OpenAPI definitions (all traffic enters through this gateway on port 8080)."));
 	}
 }
