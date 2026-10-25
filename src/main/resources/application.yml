@@ -11,6 +11,11 @@ spring:
       server:
         webmvc:
           routes:
+            - id: ms-users-auth
+              uri: ${GATEWAY_MS_USERS_URI:lb://ms-users}
+              predicates:
+                - Path=/auth/**
+
             - id: ms-users
               uri: ${GATEWAY_MS_USERS_URI:lb://ms-users}
               predicates:
@@ -71,6 +76,10 @@ eureka:
 
 server:
   port: ${SERVER_PORT:8080}
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
 
 management:
   endpoints:
@@ -102,3 +111,59 @@ logging:
   level:
     org.springframework.cloud.gateway: INFO
     com.netflix.discovery: WARN
+    com.reservas.security: INFO
+
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:local-dev-only-change-this-secret-key}
+      expiration: ${JWT_EXPIRATION:1h}
+      clock-skew: ${JWT_CLOCK_SKEW:30s}
+      issuer: ${JWT_ISSUER:reservas-ms-users}
+      token-type: ${JWT_TOKEN_TYPE:Bearer}
+    public-paths:
+      - /auth/login
+      - /v3/api-docs/**
+      - /swagger-ui/**
+      - /swagger-ui.html
+      - /webjars/**
+      - /actuator/health
+      - /actuator/info
+    rules:
+      - path: /professors/search
+        methods: [POST]
+        roles: [STUDENT, PROFESSOR, ADMINISTRATOR]
+      - path: /research-lines/search
+        methods: [POST]
+        roles: [STUDENT, PROFESSOR, ADMINISTRATOR]
+      - path: /professor-research-lines/search
+        methods: [POST]
+        roles: [STUDENT, PROFESSOR, ADMINISTRATOR]
+      - path: /time-slots/search
+        methods: [POST]
+        roles: [STUDENT, PROFESSOR, ADMINISTRATOR]
+      - path: /professor-references/search
+        methods: [POST]
+        roles: [STUDENT, PROFESSOR, ADMINISTRATOR]
+      - path: /time-slots/*/book
+        methods: [PUT]
+        roles: [STUDENT, PROFESSOR, ADMINISTRATOR]
+      - path: /time-slots/*/release
+        methods: [PUT]
+        roles: [STUDENT, PROFESSOR, ADMINISTRATOR]
+      - path: /professors/**
+        methods: [POST, PUT, DELETE]
+        roles: [PROFESSOR, ADMINISTRATOR]
+      - path: /research-lines/**
+        methods: [POST, PUT, DELETE]
+        roles: [ADMINISTRATOR]
+      - path: /professor-research-lines/**
+        methods: [PUT, DELETE]
+        roles: [PROFESSOR, ADMINISTRATOR]
+      - path: /time-slots/**
+        methods: [POST, PUT, DELETE]
+        roles: [PROFESSOR, ADMINISTRATOR]
+      - path: /users/**
+        methods: [GET, POST, PUT, DELETE]
+        roles: [ADMINISTRATOR]
+
